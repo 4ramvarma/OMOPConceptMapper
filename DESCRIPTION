@@ -1,0 +1,25 @@
+Package: OMOPConceptMapper
+Type: Package
+Title: Map ICD Codes to SNOMED and Query Concept Relationships in OMOP CDM
+Version: 0.1.0
+Authors@R: 
+    person("Ram", "Varma", , "ram.varma@example.com", role = c("aut", "cre"))
+Description: Provides functions to map ICD9CM and ICD10CM codes to SNOMED 
+    concepts and query comprehensive concept relationships in OMOP Common 
+    Data Model (CDM) databases. Supports hierarchical relationships, direct 
+    relationships, and synonym lookups.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Depends:
+    R (>= 3.5.0)
+Imports:
+    DatabaseConnector,
+    dplyr,
+    glue,
+    SqlRender
+Suggests:
+    CDMConnector,
+    tidyr,
+    testthat (>= 3.0.0)
+RoxygenNote: 7.2.0
