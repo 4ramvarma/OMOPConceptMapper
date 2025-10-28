@@ -7,6 +7,7 @@
 #'
 #' @return Character vector with escaped single quotes
 #' @keywords internal
+#' @noRd
 .escape_sql_string <- function(x) {
   gsub("'", "''", x, fixed = TRUE)
 }
@@ -19,6 +20,7 @@
 #'
 #' @return TRUE if valid, throws error otherwise
 #' @keywords internal
+#' @noRd
 .validate_cdm_schema <- function(cdm_schema) {
   if (!is.character(cdm_schema) || length(cdm_schema) != 1 || nchar(cdm_schema) == 0) {
     stop("cdm_schema must be a single non-empty character string")
@@ -34,6 +36,7 @@
 #'
 #' @return TRUE if valid, throws error otherwise
 #' @keywords internal
+#' @noRd
 .validate_connection <- function(connection) {
   if (is.null(connection)) {
     stop("connection cannot be NULL. Please establish a database connection first.")
