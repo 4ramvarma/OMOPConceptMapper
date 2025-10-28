@@ -37,6 +37,25 @@
 #'   return_mappings = TRUE
 #' )
 #' }
+# Helper functions
+escape_sql_string <- function(x) {
+  gsub("'", "''", x, fixed = TRUE)
+}
+
+validate_cdm_schema <- function(cdm_schema) {
+  if (!is.character(cdm_schema) || length(cdm_schema) != 1 || nchar(cdm_schema) == 0) {
+    stop("cdm_schema must be a single non-empty character string")
+  }
+  return(TRUE)
+}
+
+validate_connection <- function(connection) {
+  if (is.null(connection)) {
+    stop("connection cannot be NULL. Please establish a database connection first.")
+  }
+  return(TRUE)
+}
+
 icd_to_concept_relationships <- function(
     connection,
     cdm_schema,
