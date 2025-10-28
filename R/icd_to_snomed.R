@@ -1,4 +1,4 @@
-# Helper functions defined inline
+# Helper functions
 escape_sql_string <- function(x) {
   gsub("'", "''", x, fixed = TRUE)
 }
@@ -23,14 +23,29 @@ validate_connection <- function(connection) {
 #' through the OMOP CDM concept and concept_relationship tables.
 #'
 #' @param cdm_schema Character string. The name of the CDM schema 
-#' @param pattern_type Character string. Either "like" or "in"
-#' @param pattern_values Character vector. The ICD codes or patterns to search for
-#' @param source_vocabulary_id Character vector. Source vocabulary IDs. Default is c("ICD10CM", "ICD9CM")
+#'   (e.g., "healthverity_marketplace_omop_20250331")
+#' @param pattern_type Character string. Either "like" or "in". Determines how to filter codes:
+#'   * "like": Use SQL LIKE pattern matching (for prefix/wildcard searches)
+#'   * "in": Use SQL IN clause (for exact code matches)
+#' @param pattern_values Character vector. The ICD codes or patterns to search for:
+#'   * For pattern_type="like": Single pattern string (e.g., "C16%")
+#'   * For pattern_type="in": Vector of exact codes (e.g., c("C16.0", "C16.1"))
+#' @param source_vocabulary_id Character vector. Source vocabulary IDs to search.
+#'   Default is c("ICD10CM", "ICD9CM")
 #' @param target_vocabulary_id Character string. Target vocabulary ID. Default is "SNOMED"
 #' @param relationship_id Character string. The relationship type. Default is "Maps to"
 #'
 #' @return Character string containing the SQL query
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' sql <- build_icd_to_snomed_query(
+#'   cdm_schema = "healthverity_marketplace_omop_20250331",
+#'   pattern_type = "like",
+#'   pattern_values = "C16%"
+#' )
+#' }
 build_icd_to_snomed_query <- function(
     cdm_schema,
     pattern_type = c("like", "in"),
@@ -115,12 +130,36 @@ build_icd_to_snomed_query <- function(
 
 #' Map ICD Codes to SNOMED Concepts
 #'
+#' Executes a query to map ICD9CM or ICD10CM codes to SNOMED concepts.
+#' This is a convenience wrapper around build_icd_to_snomed_query() that
+#' also executes the query.
+#'
 #' @inheritParams build_icd_to_snomed_query
 #' @param connection DatabaseConnector connection object
-#' @param print_sql Logical. If TRUE, prints the SQL query. Default is FALSE
+#' @param print_sql Logical. If TRUE, prints the SQL query before executing. Default is FALSE
 #'
-#' @return Data frame with ICD to SNOMED mappings
+#' @return Data frame with columns:
+#'   * icd_concept_id: ICD concept ID
+#'   * icd_code: ICD code
+#'   * icd_name: ICD concept name
+#'   * icd_vocabulary: Vocabulary ID (ICD9CM or ICD10CM)
+#'   * snomed_concept_id: Mapped SNOMED concept ID
+#'   * snomed_code: SNOMED code
+#'   * snomed_name: SNOMED concept name
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' conn <- create_db_connection()
+#' 
+#' results <- map_icd_to_snomed(
+#'   connection = conn,
+#'   cdm_schema = "healthverity_marketplace_omop_20250331",
+#'   pattern_type = "like",
+#'   pattern_values = "C16%",
+#'   print_sql = TRUE
+#' )
+#' }
 map_icd_to_snomed <- function(
     connection,
     cdm_schema,
