@@ -1,55 +1,3 @@
-#' Query Concept Relationships
-#'
-#' Retrieves comprehensive relationship information for a set of SNOMED concept IDs,
-#' including hierarchical relationships (ancestors/descendants), direct relationships,
-#' and synonyms from the OMOP CDM.
-#'
-#' @param snomed_ids Integer vector. SNOMED concept IDs to query relationships for
-#' @param cdm_schema Character string. The name of the CDM schema
-#' @param connection DatabaseConnector connection object
-#' @param only_standard Logical. If TRUE, only return standard concepts. Default is TRUE
-#' @param only_direct Logical. If TRUE, only return direct relationships. Default is FALSE
-#' @param print_sql Logical. If TRUE, prints the SQL query before executing. Default is FALSE
-#'
-#' @return Data frame with columns:
-#'   * seed_concept_id: The original input concept ID
-#'   * seed_concept_name: Name of the seed concept
-#'   * rel_category: Category of relationship (HIERARCHY_DESCENDANT, HIERARCHY_ANCESTOR, 
-#'                   RELATIONSHIP, or SYNONYM)
-#'   * direction: Direction of relationship (descendant_of, ancestor_of, outgoing, 
-#'                incoming, or synonym_of_seed)
-#'   * relationship_id: The specific relationship type (for RELATIONSHIP category)
-#'   * levels_of_separation: Number of levels in hierarchy (for hierarchical relationships)
-#'   * related_concept_id: ID of the related concept
-#'   * related_concept_name: Name of the related concept
-#'   * vocabulary_id: Vocabulary ID of the related concept
-#'   * domain_id: Domain ID of the related concept
-#'   * standard_concept: Standard concept flag (S = Standard)
-#'   * invalid_reason: Reason for invalidity (NULL = valid)
-#'
-#' @export
-#'
-#' @examples
-#' \dontrun{
-#' conn <- create_db_connection()
-#' snomed_ids <- c(201826, 4103703, 4229881)
-#' 
-#' # Get all relationships
-#' relationships <- query_concept_relationships(
-#'   snomed_ids = snomed_ids,
-#'   cdm_schema = "healthverity_marketplace_omop_20250331",
-#'   connection = conn
-#' )
-#' 
-#' # Get only direct relationships
-#' direct_relationships <- query_concept_relationships(
-#'   snomed_ids = snomed_ids,
-#'   cdm_schema = "healthverity_marketplace_omop_20250331",
-#'   connection = conn,
-#'   only_direct = TRUE
-#' )
-#' }
-
 # Helper functions
 escape_sql_string <- function(x) {
   gsub("'", "''", x, fixed = TRUE)
@@ -69,6 +17,33 @@ validate_connection <- function(connection) {
   return(TRUE)
 }
 
+#' Query Concept Relationships
+#'
+#' Retrieves comprehensive relationship information for a set of SNOMED concept IDs,
+#' including hierarchical relationships (ancestors/descendants), direct relationships,
+#' and synonyms from the OMOP CDM.
+#'
+#' @param snomed_ids Integer vector. SNOMED concept IDs to query relationships for
+#' @param cdm_schema Character string. The name of the CDM schema
+#' @param connection DatabaseConnector connection object
+#' @param only_standard Logical. If TRUE, only return standard concepts. Default is TRUE
+#' @param only_direct Logical. If TRUE, only return direct relationships. Default is FALSE
+#' @param print_sql Logical. If TRUE, prints the SQL query before executing. Default is FALSE
+#'
+#' @return Data frame with relationship information
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' conn <- create_db_connection()
+#' snomed_ids <- c(201826, 4103703, 4229881)
+#' 
+#' relationships <- query_concept_relationships(
+#'   snomed_ids = snomed_ids,
+#'   cdm_schema = "healthverity_marketplace_omop_20250331",
+#'   connection = conn
+#' )
+#' }
 query_concept_relationships <- function(
     snomed_ids,
     cdm_schema,
@@ -79,8 +54,8 @@ query_concept_relationships <- function(
 ) {
   
   # Input validation
-  .validate_connection(connection)
-  .validate_cdm_schema(cdm_schema)
+  validate_connection(connection)
+  validate_cdm_schema(cdm_schema)
   
   if (length(snomed_ids) == 0) {
     stop("snomed_ids cannot be empty")
@@ -292,7 +267,6 @@ query_concept_relationships <- function(
 #' \dontrun{
 #' results <- map_icd_to_snomed(conn, cdm_schema, "like", "C16%")
 #' snomed_ids <- extract_snomed_ids(results)
-#' snomed_string <- extract_snomed_ids(results, as_string = TRUE)
 #' }
 extract_snomed_ids <- function(mapping_results, as_string = FALSE) {
   
